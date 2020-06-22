@@ -7,7 +7,6 @@
 import random
 
 # use .json to keep progress on funds
-# csv for database with users
 
 class SlotMachine:
     '''Setup for a slot machine.'''
