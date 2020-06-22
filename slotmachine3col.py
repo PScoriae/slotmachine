@@ -19,7 +19,7 @@ class SlotMachine:
                         'Bell', '7', 'Bar',
                         'Watermelon', 'Star', 'Grapes',]
         self.exitcommands = ['exit', 'quit', 'stop', 'leave',]
-        self.commands = ['help', 'show funds', 'show bet count',]
+        self.commands = ['help', 'show funds', 'show bet count', 'all in',]
         self.fourmatch = 50
         self.threematch = 10
         self.twopair = 3
@@ -103,6 +103,11 @@ General commands:
                     continue
                 elif self.wanttoexit(amount):
                     return False
+                elif amount.lower() == 'all in':
+                    self.incrementbetcount()
+                    self.spincost = self.chips
+                    self.chips = 0
+                    return True
                 elif 0 < int(amount) <= self.chips:
                     self.incrementbetcount()
                     self.spincost = int(amount)
