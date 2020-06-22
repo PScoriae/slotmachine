@@ -19,7 +19,7 @@ class SlotMachine:
                         'Bell', '7', 'Bar',
                         'Watermelon', 'Star', 'Grapes',]
         self.exitcommands = ['exit', 'quit', 'stop', 'leave',]
-        self.commands = ['help', 'show funds', 'show bet count', 'all in',]
+        self.commands = ['help', 'show funds', 'show bet count', 'all',]
         self.fourmatch = 50
         self.threematch = 10
         self.twopair = 3
@@ -45,8 +45,9 @@ Your current balance is ${self.cash}.
 
     # shows number of bets played so far
     def getbetcount(self):
-        print(f'You betted {self.betcount} times.')
+        print(f'You bet {self.betcount} times.')
 
+    # shows list of commands
     def getcommands(self):
         print(
 f'''
@@ -77,6 +78,14 @@ General commands:
         elif char.lower() == 'help':
             self.getcommands()
             return True
+        elif char.lower() == 'convert cash':
+            self.cashconversionmode()
+            self.getfund()
+            return True
+        elif char.lower() == 'cashout':
+            self.chipconversionmode()
+            self.getfund()
+            return True
 
     # checks if user would like to continue playing
     def spinagain(self):
@@ -103,7 +112,7 @@ General commands:
                     continue
                 elif self.wanttoexit(amount):
                     return False
-                elif amount.lower() == 'all in':
+                elif amount.lower() == 'all':
                     self.incrementbetcount()
                     self.spincost = self.chips
                     self.chips = 0
@@ -135,10 +144,10 @@ General commands:
             return False
 
     # call function to initiate cashtochips
-    def conversionmode(self):
+    def cashconversionmode(self):
         print('Now in cash conversion mode.')
         self.getfund()
-        print('How much cash would you like to convert?')
+        print('Enter amount of cash to convert:')
         while True:
             try:
                 amount = str(input())
@@ -146,11 +155,36 @@ General commands:
                     continue
                 elif self.wanttoexit(amount):
                     return False
+                elif amount == 'all':
+                    self.cashtochips(self.cash)
+                    return True
                 elif self.dtcratio <= int(amount) <= self.cash:
                     self.cashtochips(int(amount))
                     return True
                 else:
-                    print('Error! Please enter a valid number.')
+                    print('Error! Please enter a valid amount.')
+            except:
+                print('I do not understand.')
+
+    def chipconversionmode(self):
+        print('Now in chip conversion mode.')
+        self.getfund()
+        print('Enter amount of chips to convert:')
+        while True:
+            try:
+                amount = str(input())
+                if self.inputiscommand(amount):
+                    continue
+                elif self.wanttoexit(amount):
+                    return False
+                elif amount == 'all':
+                    self.chipstocash(self.chips)
+                    return True
+                elif 0 < int(amount) <= self.chips:
+                    self.chipstocash(int(amount))
+                    return True
+                else:
+                    print('Error! Please enter a valid amount.')
             except:
                 print('I do not understand.')
 
@@ -160,10 +194,10 @@ General commands:
         self.chips += convertcash
         self.cash -= convertcash * self.dtcratio
 
-    # # converts chips to cash
-    # def chipstocash(self, amount):
-    #     self.cash += amount * dtcratio
-    #     self.chips = 0
+    # converts chips to cash
+    def chipstocash(self, amount):
+        self.cash += amount * self.dtcratio
+        self.chips -= amount
 
     # selects randomized choices from symbols and appends to result list
     # also creates calc list for comparison
@@ -213,7 +247,7 @@ General commands:
                     break
             else:
                 if self.enoughcash():
-                    if not self.conversionmode():
+                    if not self.cashconversionmode():
                         break
                 else:
                     # suggest to sell organs in future
