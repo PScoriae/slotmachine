@@ -16,11 +16,13 @@ class SlotMachine:
         self.cash = cash
         self.chips = chips
         self.dupe_checker = False
-        self.symbols = ['Cherry', 'Banana', 'Watermelon', '7']
-        self.fourmatch = 10
-        self.threematch = 3
-        self.twopair = 2
-        self.onepair = 1
+        self.symbols = ['Cherry', 'Diamond', 'Orange',
+                        'Bell', '7', 'Bar',
+                        'Watermelon', 'Star', 'Grapes',]
+        self.fourmatch = 50
+        self.threematch = 10
+        self.twopair = 3
+        self.onepair = 2
         self.spincost = 1
         self.dtcratio = 100
         self.flag = True
