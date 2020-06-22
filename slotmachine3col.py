@@ -19,6 +19,7 @@ class SlotMachine:
                         'Bell', '7', 'Bar',
                         'Watermelon', 'Star', 'Grapes',]
         self.exitcommands = ['exit', 'quit', 'stop', 'leave',]
+        self.commands = ['help', 'show funds', 'show bet count',]
         self.fourmatch = 50
         self.threematch = 10
         self.twopair = 3
@@ -46,10 +47,21 @@ Your current balance is ${self.cash}.
     def getbetcount(self):
         print(f'You betted {self.betcount} times.')
 
+    def getcommands(self):
+        print(
+f'''
+Quit commands:
+{self.exitcommands}
+
+General commands:
+{self.commands}'''
+        )
+
     # increments betcount by 1
     def incrementbetcount(self):
         self.betcount += 1
 
+    # checks if user wants to exit program
     def wanttoexit(self, char):
         if char.lower() in self.exitcommands:
             return True
@@ -62,8 +74,11 @@ Your current balance is ${self.cash}.
         elif char.lower() == 'show bet count':
             self.getbetcount()
             return True
+        elif char.lower() == 'help':
+            self.getcommands()
+            return True
 
-    # determines if user would like to continue playing
+    # checks if user would like to continue playing
     def spinagain(self):
         while True:
             print('Would you like to spin again?(Y/n)')
@@ -75,11 +90,13 @@ Your current balance is ${self.cash}.
             # update to include full list of other agreements
             elif char.lower() == 'y' or not char:
                 return True
+            else:
+                print("I don't understand")
 
     # asks user how many chips to bet
     def bet(self):
-        print('How many chips are you betting? Default is 1.')
-        while True: # maybe change to for loop with defined number of tries
+        while True:
+            print('How many chips are you betting? Default is 1.')
             amount = str(input('')) or '1'
             try:
                 if self.inputiscommand(amount):
@@ -203,7 +220,7 @@ Your current balance is ${self.cash}.
 print(
 '''
 Welcome to the slot machine!
-You can type exit at any time to leave the program.
+You can type help for a list of commands.
 '''
 )
 
