@@ -30,11 +30,8 @@ class SlotMachine:
     def getfund(self):
         if self.chips == 1:
             print(
-f'''
-You now have {self.chips} chip.
-Your current balance is ${self.cash}.
-'''
-                )
+f'''You now have {self.chips} chip.
+Your current balance is ${self.cash}.''')
         else:
             print(
 f'''
@@ -45,12 +42,15 @@ Your current balance is ${self.cash}.
 
     # determines if user would like to continue playing
     def spinagain(self):
-        print('Would you like to spin again?(Y/n)')
-        question = input()
-        if question.lower() == 'y' or not question:
-            return True
-        else:
-            return False
+        while True:
+            print('Would you like to spin again?(Y/n)')
+            question = input()
+            if question.lower() == 'y' or not question:
+                return True
+            elif question.lower() == 'show funds':
+                self.getfund()
+            else:
+                return False
 
     def bet(self):
         print('How many chips are you betting? Default is 1.')
@@ -60,6 +60,8 @@ Your current balance is ${self.cash}.
                 if multiplier.lower() == 'exit':
                     return False
                     break
+                elif multiplier.lower() == 'show funds':
+                    self.getfund()
                 elif 0 < int(multiplier) <= self.chips:
                     self.spincost = int(multiplier)
                     self.chips -= self.spincost
@@ -68,7 +70,7 @@ Your current balance is ${self.cash}.
                 else:
                     print('Error! Please enter a valid amount.')
             except:
-                print('That is not a number!')
+                print('Please enter a number!')
 
     # checks if user has sufficient funds
     def enoughchips(self):
@@ -87,8 +89,9 @@ Your current balance is ${self.cash}.
 
     # call function to initiate cashtochips
     def conversionmode(self):
-        print('Now in cash conversion mode.\n'
-        'How much cash would you like to convert?')
+        print('Now in cash conversion mode.')
+        self.getfund()
+        print('How much cash would you like to convert?')
         while True:
             try:
                 amount = str(input())
@@ -97,6 +100,9 @@ Your current balance is ${self.cash}.
                 elif self.dtcratio <= int(amount) <= self.cash:
                     self.cashtochips(int(amount))
                     return True
+                elif amount.lower == 'show funds':
+                    self.getfund()
+                    print('How much cash would you like to convert?')
                 else:
                     print('Error! Please enter a valid number.')
             except:
@@ -139,6 +145,7 @@ Your current balance is ${self.cash}.
             print(f'{matches} matches! You won 1 chip!')
         else:
             print(f'{matches} matches! You won {self.spincost*prize} chips!')
+            self.getfund()
 
     # # converts chips to cash
     # def chipstocash(self, amount):
