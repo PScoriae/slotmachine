@@ -18,6 +18,7 @@ class SlotMachine:
         self.symbols = ['Cherry', 'Diamond', 'Orange',
                         'Bell', '7', 'Bar',
                         'Watermelon', 'Star', 'Grapes',]
+        self.exitcommands = ['exit', 'quit', 'stop', 'leave',]
         self.fourmatch = 50
         self.threematch = 10
         self.twopair = 3
@@ -27,6 +28,7 @@ class SlotMachine:
         self.flag = True
         self.betcount = 0
 
+    # prints user's chips and cash
     def getfund(self):
         if self.chips == 1:
             print(
@@ -39,6 +41,7 @@ You now have {self.chips} chips.
 Your current balance is ${self.cash}.
 '''
                 )
+
     # shows number of bets played so far
     def getbetcount(self):
         print(f'You betted {self.betcount} times.')
@@ -47,34 +50,45 @@ Your current balance is ${self.cash}.
     def incrementbetcount(self):
         self.betcount += 1
 
+    def wanttoexit(self, char):
+        if char.lower() in self.exitcommands:
+            return True
+
+    # if input is command, runs respective function
+    def inputiscommand(self, char):
+        if char.lower() == 'show funds':
+            self.getfund()
+            return True
+        elif char.lower() == 'show bet count':
+            self.getbetcount()
+            return True
+
     # determines if user would like to continue playing
     def spinagain(self):
         while True:
             print('Would you like to spin again?(Y/n)')
-            question = input()
-            if question.lower() == 'y' or not question:
-                return True
-            elif question.lower() == 'show funds':
-                self.getfund()
-            elif question.lower() == 'show bet count':
-                self.getbetcount()
-            else:
+            char = input()
+            if self.inputiscommand(char):
+                continue
+            elif self.wanttoexit(char):
                 return False
+            # update to include full list of other agreements
+            elif char.lower() == 'y' or not char:
+                return True
 
+    # asks user how many chips to bet
     def bet(self):
         print('How many chips are you betting? Default is 1.')
         while True: # maybe change to for loop with defined number of tries
-            multiplier = str(input('')) or '1'
+            amount = str(input('')) or '1'
             try:
-                if multiplier.lower() == 'exit':
+                if self.inputiscommand(amount):
+                    continue
+                elif self.wanttoexit(amount):
                     return False
-                elif multiplier.lower() == 'show funds':
-                    self.getfund()
-                elif multiplier.lower() == 'show bet count':
-                    self.getbetcount()
-                elif 0 < int(multiplier) <= self.chips:
+                elif 0 < int(amount) <= self.chips:
                     self.incrementbetcount()
-                    self.spincost = int(multiplier)
+                    self.spincost = int(amount)
                     self.chips -= self.spincost
                     return True
                 else:
@@ -90,6 +104,7 @@ Your current balance is ${self.cash}.
             print('Insufficient chips!')
             return False
 
+    # checks if user has sufficient cash
     def enoughcash(self):
         if self.cash >= self.dtcratio:
             return True
@@ -105,16 +120,13 @@ Your current balance is ${self.cash}.
         while True:
             try:
                 amount = str(input())
-                if amount.lower() == 'exit':
+                if self.inputiscommand(amount):
+                    continue
+                elif self.wanttoexit(amount):
                     return False
                 elif self.dtcratio <= int(amount) <= self.cash:
                     self.cashtochips(int(amount))
                     return True
-                elif amount.lower() == 'show funds':
-                    self.getfund()
-                    print('How much cash would you like to convert?')
-                elif amount.lower() == 'show bet count':
-                    self.getbetcount()
                 else:
                     print('Error! Please enter a valid number.')
             except:
