@@ -15,7 +15,6 @@ class SlotMachine:
     def __init__(self, cash=1000, chips=10):
         self.cash = cash
         self.chips = chips
-        self.dupe_checker = False
         self.symbols = ['Cherry', 'Diamond', 'Orange',
                         'Bell', '7', 'Bar',
                         'Watermelon', 'Star', 'Grapes',]
@@ -26,6 +25,7 @@ class SlotMachine:
         self.spincost = 1
         self.dtcratio = 100
         self.flag = True
+        self.betcount = 0
 
     def getfund(self):
         if self.chips == 1:
@@ -39,6 +39,13 @@ You now have {self.chips} chips.
 Your current balance is ${self.cash}.
 '''
                 )
+    # shows number of bets played so far
+    def getbetcount(self):
+        print(f'You betted {self.betcount} times.')
+
+    # increments betcount by 1
+    def incrementbetcount(self):
+        self.betcount += 1
 
     # determines if user would like to continue playing
     def spinagain(self):
@@ -49,24 +56,27 @@ Your current balance is ${self.cash}.
                 return True
             elif question.lower() == 'show funds':
                 self.getfund()
+            elif question.lower() == 'show bet count':
+                self.getbetcount()
             else:
                 return False
 
     def bet(self):
         print('How many chips are you betting? Default is 1.')
         while True: # maybe change to for loop with defined number of tries
-            multiplier = input('') or '1'
+            multiplier = str(input('')) or '1'
             try:
                 if multiplier.lower() == 'exit':
                     return False
-                    break
                 elif multiplier.lower() == 'show funds':
                     self.getfund()
+                elif multiplier.lower() == 'show bet count':
+                    self.getbetcount()
                 elif 0 < int(multiplier) <= self.chips:
+                    self.incrementbetcount()
                     self.spincost = int(multiplier)
                     self.chips -= self.spincost
                     return True
-                    break
                 else:
                     print('Error! Please enter a valid amount.')
             except:
@@ -100,9 +110,11 @@ Your current balance is ${self.cash}.
                 elif self.dtcratio <= int(amount) <= self.cash:
                     self.cashtochips(int(amount))
                     return True
-                elif amount.lower == 'show funds':
+                elif amount.lower() == 'show funds':
                     self.getfund()
                     print('How much cash would you like to convert?')
+                elif amount.lower() == 'show bet count':
+                    self.getbetcount()
                 else:
                     print('Error! Please enter a valid number.')
             except:
@@ -113,6 +125,11 @@ Your current balance is ${self.cash}.
         convertcash = amount // self.dtcratio
         self.chips += convertcash
         self.cash -= convertcash * self.dtcratio
+
+    # # converts chips to cash
+    # def chipstocash(self, amount):
+    #     self.cash += amount * dtcratio
+    #     self.chips = 0
 
     # selects randomized choices from symbols and appends to result list
     # also creates calc list for comparison
@@ -147,11 +164,7 @@ Your current balance is ${self.cash}.
             print(f'{matches} matches! You won {self.spincost*prize} chips!')
             self.getfund()
 
-    # # converts chips to cash
-    # def chipstocash(self, amount):
-    #     self.cash += amount * dtcratio
-    #     self.chips = 0
-
+    # main function with all other functions
     def main(self):
         while self.flag:
             self.counter = 0
@@ -171,6 +184,7 @@ Your current balance is ${self.cash}.
                 else:
                     # suggest to sell organs in future
                     print('Filing bankruptcy!')
+                    self.getbetcount()
                     break
 
 
