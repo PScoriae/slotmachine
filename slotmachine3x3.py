@@ -5,6 +5,7 @@
     Python version: 3.8.3rc1
 '''
 import random
+import time
 
 # use .json to keep progress on funds
 
@@ -143,40 +144,44 @@ General commands:
             return False
 
     def getresult(self):
-        '''For 3 times, gets 3 random symbols from self.symbols
+        '''For 3 times, gets 3 random unique symbols from self.symbols
         and appends to a list.
         In reels dictionary, key, value is reelnumber, list.
+        Moves contents of each list into main list.
+        Returns main list.
         '''
         self.reels = {}
+        self.finalResult = []
+        # gets results for each reel
         for reelnumber in range(3):
-            self.reels[reelnumber] = random.choices(self.symbols, k=3)
-        print(self.reels)
-        return self.reels
-
-
-        # self.calc = self.result[:]
-        # for x in self.calc:
-        #     while self.calc.count(x) > 1:
-        #         self.calc.remove(x)
-
-    def printResults(self, reelDic):
-        '''Takes in dictionary and converts
-        list values into a nice table.
-        '''
-        length = len(reelDic)
-        longestStrLen = 0
-        # # for length of dictionary (3)
-        # for x in range(length):
-            # for each key in reelDic
-        for reelNumber, reelList in reelDic.items():
-            for symbol in reelList:
-                if len(symbol) > longestStrLen:
-                    longestStrLen = len(symbol)
-
+            self.reels[reelnumber] = random.sample(self.symbols, k=3)
+        # adds results of each reel into main list.
         for x in range(3):
-            for reelNumber, reelList in reelDic.items():
-                print(reelList[x].center(longestStrLen) + ' ', end='')
-            print()
+            self.finalResult[3*x:3*x+3] = self.reels[x]
+        return self.finalResult
+
+    def printResults(self, list):
+        '''Takes in main list of results and
+        prints it into a nice table.
+        '''
+        # determines longest string length for padding in table
+        longStr = 0
+        for string in self.symbols:
+            if len(string) > longStr:
+                longStr = len(string)
+
+        prints padded results
+        print(f'{list[0].center(longStr)}')
+        print(f'{list[1].center(longStr)}')
+        print(f'{list[2].center(longStr)}')
+        time.sleep(3)
+        print(f'{list[0].center(longStr)} {list[3].center(longStr)}')
+        print(f'{list[1].center(longStr)} {list[4].center(longStr)}')
+        print(f'{list[2].center(longStr)} {list[5].center(longStr)}')
+        time.sleep(3)
+        print(f'{list[0].center(longStr)} {list[3].center(longStr)} {list[6].center(longStr)}')
+        print(f'{list[1].center(longStr)} {list[4].center(longStr)} {list[7].center(longStr)}')
+        print(f'{list[2].center(longStr)} {list[5].center(longStr)} {list[8].center(longStr)}')
 
     # call function to initiate cashtochips
     def cashconversionmode(self):
@@ -235,18 +240,15 @@ General commands:
         self.chips -= amount
 
     # calculates winnings
-    def calculate(self):
-        for item in self.calc:
-            if self.result.count(item) == 3:
-                self.payout(3, self.threematch)
-                break
-            elif self.result.count(item) == 2:
-                self.payout(2, self.onepair)
-                break
-            elif self.result.count(item) == 1:
-                self.counter += 1
-                if self.counter == 3:
-                    print('No matches!')
+    def isCombo(self):
+        x = self.finalResult
+        return ((x[0] == x[3] == x[6]) or # top row
+        (x[1] == x[4] == x[7]) or # mid row
+        (x[2] == x[5] == x[8]) or # bottom row
+        (x[0] == x[4] == x[8]) or # diagonal
+        (x[2] == x[4] == x[6])) # diagonal
+
+
 
     # calculates your new balance and prints results
     def payout(self, matches, prize):
@@ -267,7 +269,8 @@ General commands:
                 if not self.bet():
                     break
                 self.printResults(self.getresult())
-                # self.calculate()
+                if self.isCombo():
+                    print('there is a combo!')
                 if not self.spinagain():
                     break
             else:
