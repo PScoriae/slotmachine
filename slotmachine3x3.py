@@ -8,11 +8,11 @@ import random
 import time
 
 # use .json to keep progress on funds
+# flask to create gui web app version.
+# json to handle different users.
 
 class SlotMachine:
     '''Setup for a slot machine.'''
-
-    # initializes SlotMachine
     def __init__(self, cash=1000, chips=10):
         self.cash = cash
         self.chips = chips
@@ -25,12 +25,12 @@ class SlotMachine:
         self.twopair = 3
         self.onepair = 2
         self.spincost = 1
-        self.dtcratio = 100
+        self.dtcratio = 100 # Dollar to chip ratio
         self.flag = True
         self.betcount = 0
 
-    # prints user's chips and cash
     def getfund(self):
+        '''Prints user's current funds.'''
         if self.chips == 1:
             print(
 f'''You now have {self.chips} chip.
@@ -58,8 +58,8 @@ General commands:
 {self.commands}'''
         )
 
-    # increments betcount by 1
     def incrementbetcount(self):
+        '''Increments betcount by 1'''
         self.betcount += 1
 
     def wanttoexit(self, char):
@@ -150,6 +150,7 @@ General commands:
         Moves contents of each list into main list.
         Returns main list.
         '''
+        print('Spinning the reels!')
         self.reels = {}
         self.finalResult = []
         # gets results for each reel
@@ -170,7 +171,7 @@ General commands:
             if len(string) > longStr:
                 longStr = len(string)
 
-        prints padded results
+        # prints padded results
         print(f'{list[0].center(longStr)}')
         print(f'{list[1].center(longStr)}')
         print(f'{list[2].center(longStr)}')
@@ -183,8 +184,8 @@ General commands:
         print(f'{list[1].center(longStr)} {list[4].center(longStr)} {list[7].center(longStr)}')
         print(f'{list[2].center(longStr)} {list[5].center(longStr)} {list[8].center(longStr)}')
 
-    # call function to initiate cashtochips
     def cashconversionmode(self):
+        '''Input mode to convert cash to chips.'''
         print('Now in cash conversion mode.')
         self.getfund()
         print('Enter amount of cash to convert:')
@@ -207,6 +208,7 @@ General commands:
                 print('I do not understand.')
 
     def chipconversionmode(self):
+        '''Input mode to convert chips to cash.'''
         print('Now in chip conversion mode.')
         self.getfund()
         print('Enter amount of chips to convert:')
@@ -228,19 +230,19 @@ General commands:
             except:
                 print('I do not understand.')
 
-    # converts cash to chips
     def cashtochips(self, amount):
+        '''Converts cash to chips.'''
         convertcash = amount // self.dtcratio
         self.chips += convertcash
         self.cash -= convertcash * self.dtcratio
 
-    # converts chips to cash
     def chipstocash(self, amount):
+        '''Converts chips to cash.'''
         self.cash += amount * self.dtcratio
         self.chips -= amount
 
-    # calculates winnings
     def isCombo(self):
+        '''Determines if spin has a combo.'''
         x = self.finalResult
         return ((x[0] == x[3] == x[6]) or # top row
         (x[1] == x[4] == x[7]) or # mid row
@@ -248,19 +250,14 @@ General commands:
         (x[0] == x[4] == x[8]) or # diagonal
         (x[2] == x[4] == x[6])) # diagonal
 
-
-
-    # calculates your new balance and prints results
     def payout(self, matches, prize):
+        '''Pays the player.'''
         self.chips += self.spincost * prize
-        if self.spincost * prize == 1:
-            print(f'{matches} matches! You won 1 chip!')
-        else:
-            print(f'{matches} matches! You won {self.spincost*prize} chips!')
-            self.getfund()
+        print(f'You won {self.spincost*prize} chips!')
+        self.getfund()
 
-    # main function with all other functions
     def main(self):
+        '''Main function encapsulating other functions.'''
         while self.flag:
             self.counter = 0
             self.paircounter = 0
@@ -270,7 +267,8 @@ General commands:
                     break
                 self.printResults(self.getresult())
                 if self.isCombo():
-                    print('there is a combo!')
+                    print('There is a combo!')
+
                 if not self.spinagain():
                     break
             else:
@@ -287,7 +285,7 @@ General commands:
 print(
 '''
 Welcome to the slot machine!
-You can type help for a list of commands.
+You can type 'help' for a list of commands.
 '''
 )
 
