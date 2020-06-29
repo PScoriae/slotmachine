@@ -41,7 +41,7 @@ Your current balance is ${self.cash}.''')
 f'''You now have {self.chips} chips.
 Your current balance is ${self.cash}.
 '''
-                )
+)
 
     def getbetcount(self):
         '''Prints current bet count.'''
@@ -59,11 +59,11 @@ General commands:
         )
 
     def incrementbetcount(self):
-        '''Increments betcount by 1'''
+        '''Increments betcount by 1.'''
         self.betcount += 1
 
     def wanttoexit(self, char):
-        '''Checks if user wants to exit program'''
+        '''Checks if user wants to exit program.'''
         if char.lower() in self.exitcommands:
             return True
 
@@ -171,7 +171,7 @@ General commands:
             if len(string) > longStr:
                 longStr = len(string)
 
-        # prints padded results
+        # Prints padded results.
         if self.animation == True:
             print(f'{list[0].center(longStr)}')
             print(f'{list[1].center(longStr)}')
