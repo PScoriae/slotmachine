@@ -13,21 +13,22 @@ import time
 
 class SlotMachine:
     '''Setup for a slot machine.'''
-    def __init__(self, cash=1000, chips=10):
-        self.cash = cash
-        self.chips = chips
-        self.symbols = ['1', '2', '3',
-                        '4', '5', '6',]
+    def __init__(self, cash=15000, chips=1000):
+        self.symbols = ['Diamond', 'Gold', 'Silver',
+                        'Bronze', '7', 'Cherry',]
+        self.symbolMultiplier = {self.symbols[0]: 10, self.symbols[1]: 7,
+                                self.symbols[2]: 5, self.symbols[3]: 2,
+                                self.symbols[4]: 9, self.symbols[5]: 8}
         self.exitcommands = ['exit', 'quit', 'stop', 'leave',]
         self.commands = ['help', 'show funds', 'show bet count', 'all',]
-        self.fourmatch = 50
-        self.threematch = 10
-        self.twopair = 3
-        self.onepair = 2
+
+        self.cash = cash
+        self.chips = chips
         self.spincost = 1
-        self.dtcratio = 100 # Dollar to chip ratio
+        self.dtcratio = 100  # Dollar to chip ratio
         self.flag = True
         self.betcount = 0
+        self.animation = True
 
     def getfund(self):
         '''Prints user's current funds.'''
@@ -37,8 +38,7 @@ f'''You now have {self.chips} chip.
 Your current balance is ${self.cash}.''')
         else:
             print(
-f'''
-You now have {self.chips} chips.
+f'''You now have {self.chips} chips.
 Your current balance is ${self.cash}.
 '''
                 )
@@ -172,17 +172,25 @@ General commands:
                 longStr = len(string)
 
         # prints padded results
-        print(f'{list[0].center(longStr)}')
-        print(f'{list[1].center(longStr)}')
-        print(f'{list[2].center(longStr)}')
-        time.sleep(3)
-        print(f'{list[0].center(longStr)} {list[3].center(longStr)}')
-        print(f'{list[1].center(longStr)} {list[4].center(longStr)}')
-        print(f'{list[2].center(longStr)} {list[5].center(longStr)}')
-        time.sleep(3)
-        print(f'{list[0].center(longStr)} {list[3].center(longStr)} {list[6].center(longStr)}')
-        print(f'{list[1].center(longStr)} {list[4].center(longStr)} {list[7].center(longStr)}')
-        print(f'{list[2].center(longStr)} {list[5].center(longStr)} {list[8].center(longStr)}')
+        if self.animation == True:
+            print(f'{list[0].center(longStr)}')
+            print(f'{list[1].center(longStr)}')
+            print(f'{list[2].center(longStr)}')
+            print()
+            time.sleep(3)
+            print(f'{list[0].center(longStr)} {list[3].center(longStr)}')
+            print(f'{list[1].center(longStr)} {list[4].center(longStr)}')
+            print(f'{list[2].center(longStr)} {list[5].center(longStr)}')
+            print()
+            time.sleep(3)
+            print(f'{list[0].center(longStr)} {list[3].center(longStr)} {list[6].center(longStr)}')
+            print(f'{list[1].center(longStr)} {list[4].center(longStr)} {list[7].center(longStr)}')
+            print(f'{list[2].center(longStr)} {list[5].center(longStr)} {list[8].center(longStr)}')
+
+        else:
+            print(f'{list[0].center(longStr)} {list[3].center(longStr)} {list[6].center(longStr)}')
+            print(f'{list[1].center(longStr)} {list[4].center(longStr)} {list[7].center(longStr)}')
+            print(f'{list[2].center(longStr)} {list[5].center(longStr)} {list[8].center(longStr)}')
 
     def cashconversionmode(self):
         '''Input mode to convert cash to chips.'''
@@ -242,22 +250,31 @@ General commands:
         self.chips -= amount
 
     def isCombo(self):
-        '''Determines if spin has a combo.'''
         x = self.finalResult
-        return ((x[0] == x[3] == x[6]) or # top row
-        (x[1] == x[4] == x[7]) or # mid row
-        (x[2] == x[5] == x[8]) or # bottom row
-        (x[0] == x[4] == x[8]) or # diagonal
-        (x[2] == x[4] == x[6])) # diagonal
+        # Checks for row matches.
+        for index in range(2):
+            if x[index] == x[index+3] == x[index+6]:
+                self.matchedSymbol = x[index]
+                return True
 
-    def payout(self, matches, prize):
-        '''Pays the player.'''
-        self.chips += self.spincost * prize
-        print(f'You won {self.spincost*prize} chips!')
+        # Checks for negative diagonal.
+        if x[0] == x[4] == x[8]:
+            self.matchedSymbol = x[0]
+            return True
+
+        # Checks for positive diagonal.
+        if x[2] == x[4] == x[6]:
+            self.matchedSymbol = x[2]
+            return True
+
+    def payout(self, matchedSymbol, symbolMultiplier):
+        '''Pays the player accounting for coin and symbol multiplier.'''
+        self.chips += self.spincost * symbolMultiplier
+        print(f'You got a match for {matchedSymbol}! You won {self.spincost*symbolMultiplier} chips!')
         self.getfund()
 
     def main(self):
-        '''Main function encapsulating other functions.'''
+        '''Main function to run the logic of the game.'''
         while self.flag:
             self.counter = 0
             self.paircounter = 0
@@ -268,7 +285,9 @@ General commands:
                 self.printResults(self.getresult())
                 if self.isCombo():
                     print('There is a combo!')
-
+                    self.payout(self.matchedSymbol, self.symbolMultiplier[self.matchedSymbol])
+                else:
+                    print('No combos.')
                 if not self.spinagain():
                     break
             else:
@@ -283,8 +302,7 @@ General commands:
 
 
 print(
-'''
-Welcome to the slot machine!
+'''Welcome to the slot machine!
 You can type 'help' for a list of commands.
 '''
 )
