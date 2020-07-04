@@ -1,10 +1,11 @@
 '''
-    File name: slotmachine3col.py
-    Author: Pierre Corazo Cesario
-    Date created: 17/06/2020
-    Python version: 3.8.3rc1
+File name: slotmachine3col.py
+Author: Pierre Corazo Cesario
+Date created: 17/06/2020
+Python version: 3.8.3rc1
 '''
 import random
+import sys
 import time
 
 # use .json to keep progress on funds
@@ -21,7 +22,6 @@ class SlotMachine:
                                 self.symbols[4]: 9, self.symbols[5]: 8}
         self.exitcommands = ['exit', 'quit', 'stop', 'leave',]
         self.commands = ['help', 'show funds', 'show bet count', 'all',]
-
         self.cash = cash
         self.chips = chips
         self.spincost = 1
@@ -64,8 +64,7 @@ General commands:
 
     def wanttoexit(self, char):
         '''Checks if user wants to exit program.'''
-        if char.lower() in self.exitcommands:
-            return True
+        return char.lower() in self.exitcommands
 
     def inputiscommand(self, char):
         '''If input is command, runs respective function.'''
@@ -91,14 +90,16 @@ General commands:
         '''Checks if the user would like to continue playing.'''
         while True:
             print('Would you like to spin again?(Y/n)')
-            char = input()
+            char = input() or 'y'
             if self.inputiscommand(char):
                 continue
             elif self.wanttoexit(char):
                 return False
             # update to include full list of other agreements
-            elif char.lower() == 'y' or not char:
+            elif char.lower() in ['y', 'yes']:
                 return True
+            elif char.lower() in ['n', 'no']:
+                return False
             else:
                 print("I don't understand")
 
@@ -127,32 +128,10 @@ General commands:
             except:
                 print('Please enter a number!')
 
-    def enoughchips(self):
-        '''Checks if user has sufficient chips.'''
-        if self.chips >= 1:
-            return True
-        else:
-            print('Insufficient chips!')
-            return False
-
-    def enoughcash(self):
-        '''Checks if user has sufficient cash.'''
-        if self.cash >= self.dtcratio:
-            return True
-        else:
-            print('Insufficient cash!')
-            return False
-
-    def getresult(self):
-        '''For 3 times, gets 3 random unique symbols from self.symbols
-        and appends to a list.
-        In reels dictionary, key, value is reelnumber, list.
-        Moves contents of each list into main list.
-        Returns main list.
-        '''
+    def spinReel(self):
+        '''Spins the reels and returns a list with results.'''
         print('Spinning the reels!')
-        self.reels = {}
-        self.finalResult = []
+        self.reels, self.finalResult = {}, []
         # gets results for each reel
         for reelnumber in range(3):
             self.reels[reelnumber] = random.sample(self.symbols, k=3)
@@ -162,9 +141,7 @@ General commands:
         return self.finalResult
 
     def printResults(self, list):
-        '''Takes in main list of results and
-        prints it into a nice table.
-        '''
+        '''Prints list of results into a pseudo 3x3 reel.'''
         # determines longest string length for padding in table
         longStr = 0
         for string in self.symbols:
@@ -173,24 +150,19 @@ General commands:
 
         # Prints padded results.
         if self.animation == True:
-            print(f'{list[0].center(longStr)}')
-            print(f'{list[1].center(longStr)}')
-            print(f'{list[2].center(longStr)}')
+            for x in range(3):
+                print(f'{list[x].center(longStr)}')
             print()
-            time.sleep(3)
-            print(f'{list[0].center(longStr)} {list[3].center(longStr)}')
-            print(f'{list[1].center(longStr)} {list[4].center(longStr)}')
-            print(f'{list[2].center(longStr)} {list[5].center(longStr)}')
+            time.sleep(1.5)
+            for x in range(3):
+                print(f'{list[x].center(longStr)} {list[x+3].center(longStr)}')
             print()
-            time.sleep(3)
-            print(f'{list[0].center(longStr)} {list[3].center(longStr)} {list[6].center(longStr)}')
-            print(f'{list[1].center(longStr)} {list[4].center(longStr)} {list[7].center(longStr)}')
-            print(f'{list[2].center(longStr)} {list[5].center(longStr)} {list[8].center(longStr)}')
-
+            time.sleep(1.5)
+            for x in range(3):
+                print(f'{list[x].center(longStr)} {list[x+3].center(longStr)} {list[x+6].center(longStr)}')
         else:
-            print(f'{list[0].center(longStr)} {list[3].center(longStr)} {list[6].center(longStr)}')
-            print(f'{list[1].center(longStr)} {list[4].center(longStr)} {list[7].center(longStr)}')
-            print(f'{list[2].center(longStr)} {list[5].center(longStr)} {list[8].center(longStr)}')
+            for x in range(3):
+                print(f'{list[x].center(longStr)} {list[x+3].center(longStr)} {list[x+6].center(longStr)}')
 
     def cashconversionmode(self):
         '''Input mode to convert cash to chips.'''
@@ -276,30 +248,30 @@ General commands:
     def main(self):
         '''Main function to run the logic of the game.'''
         while self.flag:
-            self.counter = 0
-            self.paircounter = 0
-            if self.enoughchips():
+            self.counter, self.paircounter = 0, 0
+            if self.chips >= 1:
                 self.getfund()
                 if not self.bet():
-                    break
-                self.printResults(self.getresult())
+                    sys.exit()
+                self.printResults(self.spinReel())
                 if self.isCombo():
                     print('There is a combo!')
                     self.payout(self.matchedSymbol, self.symbolMultiplier[self.matchedSymbol])
                 else:
                     print('No combos.')
                 if not self.spinagain():
-                    break
+                    sys.exit()
             else:
-                if self.enoughcash():
+                print('Insufficient chips!')
+                if self.cash >= self.dtcratio:
                     if not self.cashconversionmode():
-                        break
+                        sys.exit()
                 else:
                     # suggest to sell organs in future
+                    print('Insufficient cash!')
                     print('Filing bankruptcy!')
                     self.getbetcount()
-                    break
-
+                    sys.exit()
 
 print(
 '''Welcome to the slot machine!
