@@ -1,8 +1,7 @@
 '''
-File name: slotmachine3col.py
+File name: slotmachine.py
 Author: Pierre Corazo Cesario
 Date created: 17/06/2020
-Python version: 3.8.3rc1
 '''
 import random
 import sys
@@ -14,7 +13,7 @@ import time
 
 class SlotMachine:
     '''Setup for a slot machine.'''
-    def __init__(self, cash=15000, chips=1000):
+    def __init__(self, user):
         self.symbols = ['Diamond', 'Gold', 'Silver',
                         'Bronze', '7', 'Cherry',]
         self.symbolMultiplier = {self.symbols[0]: 10, self.symbols[1]: 7,
@@ -22,26 +21,11 @@ class SlotMachine:
                                 self.symbols[4]: 9, self.symbols[5]: 8}
         self.exitcommands = ['exit', 'quit', 'stop', 'leave',]
         self.commands = ['help', 'show funds', 'show bet count', 'all',]
-        self.cash = cash
-        self.chips = chips
         self.spincost = 1
         self.dtcratio = 100  # Dollar to chip ratio
         self.flag = True
         self.betcount = 0
         self.animation = True
-
-    def getfund(self):
-        '''Prints user's current funds.'''
-        if self.chips == 1:
-            print(
-f'''You now have {self.chips} chip.
-Your current balance is ${self.cash}.''')
-        else:
-            print(
-f'''You now have {self.chips} chips.
-Your current balance is ${self.cash}.
-'''
-)
 
     def getbetcount(self):
         '''Prints current bet count.'''
@@ -164,63 +148,6 @@ General commands:
             for x in range(3):
                 print(f'{list[x].center(longStr)} {list[x+3].center(longStr)} {list[x+6].center(longStr)}')
 
-    def cashconversionmode(self):
-        '''Input mode to convert cash to chips.'''
-        print('Now in cash conversion mode.')
-        self.getfund()
-        print('Enter amount of cash to convert:')
-        while True:
-            try:
-                amount = str(input())
-                if self.inputiscommand(amount):
-                    continue
-                elif self.wanttoexit(amount):
-                    return False
-                elif amount == 'all':
-                    self.cashtochips(self.cash)
-                    return True
-                elif self.dtcratio <= int(amount) <= self.cash:
-                    self.cashtochips(int(amount))
-                    return True
-                else:
-                    print('Error! Please enter a valid amount.')
-            except:
-                print('I do not understand.')
-
-    def chipconversionmode(self):
-        '''Input mode to convert chips to cash.'''
-        print('Now in chip conversion mode.')
-        self.getfund()
-        print('Enter amount of chips to convert:')
-        while True:
-            try:
-                amount = str(input())
-                if self.inputiscommand(amount):
-                    continue
-                elif self.wanttoexit(amount):
-                    return False
-                elif amount == 'all':
-                    self.chipstocash(self.chips)
-                    return True
-                elif 0 < int(amount) <= self.chips:
-                    self.chipstocash(int(amount))
-                    return True
-                else:
-                    print('Error! Please enter a valid amount.')
-            except:
-                print('I do not understand.')
-
-    def cashtochips(self, amount):
-        '''Converts cash to chips.'''
-        convertcash = amount // self.dtcratio
-        self.chips += convertcash
-        self.cash -= convertcash * self.dtcratio
-
-    def chipstocash(self, amount):
-        '''Converts chips to cash.'''
-        self.cash += amount * self.dtcratio
-        self.chips -= amount
-
     def isCombo(self):
         x = self.finalResult
         # Checks for row matches.
@@ -248,7 +175,6 @@ General commands:
     def main(self):
         '''Main function to run the logic of the game.'''
         while self.flag:
-            self.counter, self.paircounter = 0, 0
             if self.chips >= 1:
                 self.getfund()
                 if not self.bet():
