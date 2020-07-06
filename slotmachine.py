@@ -1,13 +1,8 @@
-'''
-File name: slotmachine.py
-Author: Pierre Corazo Cesario
-Date created: 17/06/2020
-'''
 import random
 import sys
 import time
 
-# use .json to keep progress on funds
+
 # flask to create gui web app version.
 # json to handle different users.
 
@@ -53,7 +48,7 @@ General commands:
     def inputiscommand(self, char):
         '''If input is command, runs respective function.'''
         if char.lower() == 'show funds':
-            self.getfund()
+            user.getFund()
             return True
         elif char.lower() == 'show bet count':
             self.getbetcount()
@@ -62,12 +57,12 @@ General commands:
             self.getcommands()
             return True
         elif char.lower() == 'convert cash':
-            self.cashconversionmode()
-            self.getfund()
+            user.cashconversionmode()
+            user.getFund()
             return True
         elif char.lower() == 'cashout':
             self.chipconversionmode()
-            self.getfund()
+            user.getFund()
             return True
 
     def spinagain(self):
@@ -87,7 +82,7 @@ General commands:
             else:
                 print("I don't understand")
 
-    def bet(self):
+    def bet(self, user):
         '''Asks user how many chips to bet.'''
         while True:
             print('How many chips are you betting? Default is 1.')
@@ -99,17 +94,17 @@ General commands:
                     return False
                 elif amount.lower() == 'all':
                     self.incrementbetcount()
-                    self.spincost = self.chips
-                    self.chips = 0
+                    self.spincost = user.chips
+                    user.chips = 0
                     return True
-                elif 0 < int(amount) <= self.chips:
+                elif 0 < int(amount) <= user.chips:
                     self.incrementbetcount()
                     self.spincost = int(amount)
-                    self.chips -= self.spincost
+                    user.chips -= self.spincost
                     return True
                 else:
                     print('Error! Please enter a valid amount.')
-            except:
+            except TypeError:
                 print('Please enter a number!')
 
     def spinReel(self):
@@ -166,31 +161,88 @@ General commands:
             self.matchedSymbol = x[2]
             return True
 
-    def payout(self, matchedSymbol, symbolMultiplier):
+    def payout(self, user, matchedSymbol, symbolMultiplier):
         '''Pays the player accounting for coin and symbol multiplier.'''
-        self.chips += self.spincost * symbolMultiplier
+        user.chips += self.spincost * symbolMultiplier
         print(f'You got a match for {matchedSymbol}! You won {self.spincost*symbolMultiplier} chips!')
-        self.getfund()
+        user.getFund()
 
-    def main(self):
+    def cashconversionmode(self, user):
+        '''Input mode to convert cash to chips.'''
+        print('Now in cash conversion mode.')
+        user.getFund()
+        print('Enter amount of cash to convert:')
+        while True:
+            # try:
+            amount = str(input())
+            if self.inputiscommand(amount):
+                continue
+            elif self.wanttoexit(amount):
+                return False
+            elif amount.lower() == 'all':
+                self.cashtochips(user, self.cash)
+                return True
+            elif self.dtcratio <= int(amount) <= user.cash:
+                self.cashtochips(int(amount))
+                return True
+            else:
+                print('Error! Please enter a valid amount.')
+            # except:
+            #     print('I do not understand.')
+
+    def chipconversionmode(self, user):
+        '''Input mode to convert chips to cash.'''
+        print('Now in chip conversion mode.')
+        user.getFund()
+        print('Enter amount of chips to convert:')
+        while True:
+            # try:
+            amount = str(input())
+            if self.inputiscommand(amount):
+                continue
+            elif self.wanttoexit(amount):
+                return False
+            elif amount.lower() == 'all':
+                self.chipstocash(user, user.chips)
+                return True
+            elif 0 < int(amount) <= self.chips:
+                self.chipstocash(int(amount))
+                return True
+            else:
+                print('Error! Please enter a valid amount.')
+            # except:
+            #     print('I do not understand.')
+
+    def cashtochips(self, user, amount):
+        '''Converts cash to chips.'''
+        convertcash = amount // self.dtcratio
+        user.chips += convertcash
+        user.cash -= convertcash * self.dtcratio
+
+    def chipstocash(self, user, amount):
+        '''Converts chips to cash.'''
+        user.cash += amount * self.dtcratio
+        user.chips -= amount
+
+    def main(self, user):
         '''Main function to run the logic of the game.'''
         while self.flag:
-            if self.chips >= 1:
-                self.getfund()
-                if not self.bet():
+            if user.chips >= 1:
+                user.getFund()
+                if not self.bet(user):
                     sys.exit()
                 self.printResults(self.spinReel())
                 if self.isCombo():
                     print('There is a combo!')
-                    self.payout(self.matchedSymbol, self.symbolMultiplier[self.matchedSymbol])
+                    self.payout(self.matchedSymbol, user, self.symbolMultiplier[self.matchedSymbol])
                 else:
                     print('No combos.')
                 if not self.spinagain():
                     sys.exit()
             else:
                 print('Insufficient chips!')
-                if self.cash >= self.dtcratio:
-                    if not self.cashconversionmode():
+                if user.cash >= self.dtcratio:
+                    if not self.cashconversionmode(user):
                         sys.exit()
                 else:
                     # suggest to sell organs in future
@@ -199,11 +251,8 @@ General commands:
                     self.getbetcount()
                     sys.exit()
 
-print(
-'''Welcome to the slot machine!
-You can type 'help' for a list of commands.
-'''
-)
-
-machine = SlotMachine()
-machine.main()
+# print(
+# '''Welcome to the slot machine!
+# You can type 'help' for a list of commands.
+# '''
+# )
