@@ -1,2 +1,3 @@
 # slotmachine
- Personal long term project on a slot machine.
+
+One of my first programs ever.
